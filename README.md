@@ -7,12 +7,23 @@ thus providing NVENC for OBS.
 It is brought to you by [Linux GameCast](http://linuxgamecast.com/) and
 [Lutris](https://lutris.net) #lgccares
 
+## Requirements
+
+* CUDA driver and toolkit
+```
+wget http://developer.download.nvidia.com/compute/cuda/10.2/Prod/local_installers/cuda_10.2.89_440.33.01_linux.run
+sudo sh cuda_10.2.89_440.33.01_linux.run
+```
+* unzip
+* git
+
+
 ## Usage
 
 Clone the repo then use the `build.sh` script to compile the binaries
 
 ```
-git clone https://github.com/lutris/ffmpeg-nvenc.git
+git clone https://github.com/nicholas-littlelives/ffmpeg-nvenc.git
 cd ffmpeg-nvenc
 ./build.sh --dest $HOME/apps/ffmpeg-nvenc
 ```

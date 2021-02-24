@@ -85,8 +85,14 @@ InstallNvidiaSDK() {
 InstallNvCodecIncludes() {
     echo "Installing Nv codec headers from https://github.com/FFmpeg/nv-codec-headers"
     cd "$source_dir"
-    git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
-    cd nv-codec-headers
+    if [ -d nv-codec-headers ]; then
+        cd nv-codec-headers
+        git pull
+    else
+        git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
+        cd nv-codec-headers
+    fi
+    git checkout sdk/9.0
     make
     sudo make install
 }
@@ -120,9 +126,13 @@ BuildYasm() {
 BuildX264() {
     echo "Compiling libx264"
     cd $source_dir
-    wget -4 http://download.videolan.org/pub/x264/snapshots/last_x264.tar.bz2
-    tar xjf last_x264.tar.bz2
-    cd x264-snapshot*
+    if [ -d x264 ]; then
+        cd x264
+        git pull
+    else
+        git clone https://code.videolan.org/videolan/x264.git
+        cd x264
+    fi
     ./configure --prefix="$build_dir" --bindir="$bin_dir" --enable-pic --enable-shared
     make -j${cpus}
     make install
@@ -158,7 +168,7 @@ BuildOpus() {
     cd $source_dir
     opus_version="1.1"
     opus_basename="opus-${opus_version}"
-    wget -4 "http://downloads.xiph.org/releases/opus/${opus_basename}.tar.gz"
+    wget -4 "https://ftp.osuosl.org/pub/xiph/releases/opus/${opus_basename}.tar.gz"
     tar xzf "${opus_basename}.tar.gz"
     cd $opus_basename
     ./configure --prefix="$build_dir" # --disable-shared
@@ -191,8 +201,8 @@ BuildFFmpeg() {
     cd ffmpeg-${ffmpeg_version}
     PKG_CONFIG_PATH="${build_dir}/lib/pkgconfig" ./configure \
         --prefix="$build_dir" \
-        --extra-cflags="-fPIC -m64 -I${inc_dir}" \
-        --extra-ldflags="-L${build_dir}/lib" \
+        --extra-cflags="-fPIC -m64 -I${inc_dir} -I/usr/local/cuda/include" \
+        --extra-ldflags="-L${build_dir}/lib -L/usr/local/cuda/lib64" \
         --bindir="$bin_dir" \
         --incdir="$inc_dir" \
         --enable-gpl \
@@ -209,6 +219,7 @@ BuildFFmpeg() {
         --enable-nvenc \
         --enable-pic \
         --enable-libxcb \
+        --enable-libnpp \
         --extra-ldexeflags=-pie \
         --enable-shared
     make -j${cpus}
@@ -218,58 +229,58 @@ BuildFFmpeg() {
 
     # ffmpeg version 4.0.2-2 Copyright (c) 2000-2018 the FFmpeg developers
     #   built with gcc 8 (Ubuntu 8.2.0-7ubuntu1)
-    #   configuration: --prefix=/usr 
-    #                  --extra-version=2 
-    #                  --toolchain=hardened 
-    #                  --libdir=/usr/lib/x86_64-linux-gnu 
-    #                  --incdir=/usr/include/x86_64-linux-gnu 
-    #                  --arch=amd64 
-    #                  --enable-gpl 
-    #                  --disable-stripping 
-    #                  --enable-avresample 
-    #                  --disable-filter=resample 
-    #                  --enable-avisynth 
-    #                  --enable-gnutls 
-    #                  --enable-ladspa 
-    #                  --enable-libass 
-    #                  --enable-libbluray 
-    #                  --enable-libbs2b 
-    #                  --enable-libcaca 
-    #                  --enable-libcdio 
-    #                  --enable-libcodec2 
-    #                  --enable-libflite 
-    #                  --enable-libfontconfig 
+    #   configuration: --prefix=/usr
+    #                  --extra-version=2
+    #                  --toolchain=hardened
+    #                  --libdir=/usr/lib/x86_64-linux-gnu
+    #                  --incdir=/usr/include/x86_64-linux-gnu
+    #                  --arch=amd64
+    #                  --enable-gpl
+    #                  --disable-stripping
+    #                  --enable-avresample
+    #                  --disable-filter=resample
+    #                  --enable-avisynth
+    #                  --enable-gnutls
+    #                  --enable-ladspa
+    #                  --enable-libass
+    #                  --enable-libbluray
+    #                  --enable-libbs2b
+    #                  --enable-libcaca
+    #                  --enable-libcdio
+    #                  --enable-libcodec2
+    #                  --enable-libflite
+    #                  --enable-libfontconfig
     #                  --enable-libfreetype
     #                  --enable-libfribidi
-    #                  --enable-libgme 
-    #                  --enable-libgsm 
-    #                  --enable-libjack 
-    #                  --enable-libmp3lame 
-    #                  --enable-libmysofa 
-    #                  --enable-libopenjpeg 
-    #                  --enable-libopenmpt 
-    #                  --enable-libopus 
-    #                  --enable-libpulse 
-    #                  --enable-librsvg 
-    #                  --enable-librubberband 
-    #                  --enable-libshine 
-    #                  --enable-libsnappy 
-    #                  --enable-libsoxr 
-    #                  --enable-libspeex 
-    #                  --enable-libssh 
-    #                  --enable-libtheora 
-    #                  --enable-libtwolame 
-    #                  --enable-libvorbis 
-    #                  --enable-libvpx 
-    #                  --enable-libwavpack 
-    #                  --enable-libwebp 
-    #                  --enable-libx265 
-    #                  --enable-libxml2 
-    #                  --enable-libxvid 
-    #                  --enable-libzmq 
-    #                  --enable-libzvbi 
-    #                  --enable-lv2 
-    #                  --enable-omx 
+    #                  --enable-libgme
+    #                  --enable-libgsm
+    #                  --enable-libjack
+    #                  --enable-libmp3lame
+    #                  --enable-libmysofa
+    #                  --enable-libopenjpeg
+    #                  --enable-libopenmpt
+    #                  --enable-libopus
+    #                  --enable-libpulse
+    #                  --enable-librsvg
+    #                  --enable-librubberband
+    #                  --enable-libshine
+    #                  --enable-libsnappy
+    #                  --enable-libsoxr
+    #                  --enable-libspeex
+    #                  --enable-libssh
+    #                  --enable-libtheora
+    #                  --enable-libtwolame
+    #                  --enable-libvorbis
+    #                  --enable-libvpx
+    #                  --enable-libwavpack
+    #                  --enable-libwebp
+    #                  --enable-libx265
+    #                  --enable-libxml2
+    #                  --enable-libxvid
+    #                  --enable-libzmq
+    #                  --enable-libzvbi
+    #                  --enable-lv2
+    #                  --enable-omx
     #                  --enable-openal
     #                  --enable-opengl
     #                  --enable-sdl2
