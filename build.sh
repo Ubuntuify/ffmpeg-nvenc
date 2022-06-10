@@ -83,7 +83,7 @@ InstallNvidiaSDK() {
 }
 
 InstallNvCodecIncludes() {
-    echo "Installing Nv codec headers from https://github.com/FFmpeg/nv-codec-headers"
+    echo "Installing Nv codec headers from https://git.videolan.org/git/ffmpeg/nv-codec-headers.git"
     cd "$source_dir"
     if [ -d nv-codec-headers ]; then
         cd nv-codec-headers
